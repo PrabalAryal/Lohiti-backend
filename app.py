@@ -22,7 +22,7 @@ def get_random_questions():
     return questions[:30]
 
 
-@app.route("/api/questions", methods=["GET"])
+@app.route("/", methods=["GET"])
 def get_questions():
     questions = get_random_questions()
     return jsonify(questions)
@@ -37,5 +37,3 @@ def receive_answers():
 
 
 
-if __name__ == "__main__":
-    app.run(debug=True)
