@@ -36,4 +36,5 @@ def receive_answers():
     return jsonify({'message': 'Answers received'}), 200
 
 
-
+if __name__ == "__main__":
+    app.run(debug=True)
