@@ -29,12 +29,5 @@ def get_questions():
 
 
 
-@app.route('/api/answers', methods=['POST'])
-def receive_answers():
-    answers = request.get_json()
-    # process the answers
-    return jsonify({'message': 'Answers received'}), 200
-
-
 if __name__ == "__main__":
     app.run(debug=True)
