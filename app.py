@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify
 from flask_cors import CORS
 import pymongo
 import random
@@ -26,7 +26,6 @@ def get_random_questions():
 def get_questions():
     questions = get_random_questions()
     return jsonify(questions)
-
 
 
 if __name__ == "__main__":
