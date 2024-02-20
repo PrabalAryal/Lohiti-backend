@@ -4,7 +4,8 @@ import pymongo
 import random
 import numpy as np
 import matplotlib.pyplot as plt
-import pandas as pd
+
+# import pandas as pd
 import sklearn
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
@@ -58,7 +59,7 @@ class collection_hard_questions(collection_easy_questions, collection_medium_que
 @app.route("/age", methods=["POST"])
 def receive_age():
     age = request.json.get("age")
-    return age
+    print("the age is ", age)
 
 
 @app.route("/api/questions", methods=["GET"])
@@ -68,10 +69,13 @@ def get_questions():
     correct_answers = [question["correct_answer"] for question in questions]
     return jsonify(questions)
 
-@app.route("/api/answers", methods=["POST"])
+
+@app.route("/api/answers", methods=["POST", "GET"])
 def receive_answers():
-    age = receive_age()  
-    answers = request.json.get("answers", [])
+    # age = receive_age()  # Assuming this function is defined elsewhere
+    answers = request.json.get(
+        "answers", []
+    )  # Change to 'answers' instead of 'selectedOptions'
     score = 0
     print(correct_answers)
     print(answers)
@@ -79,13 +83,21 @@ def receive_answers():
         if answers[i].lower() == correct_answers[i].lower():
             score += 1
 
-    mean = 12  
+    mean = 12  # Adjust the mean and standard deviation according to your data
     standard_deviation = 5.113
     z_score = (score - mean) / standard_deviation
     iq_score = (z_score * 15) + 100
-    collection4.insert_one({"age": age, "score": score, "z_score": z_score})
-
+    collection4.insert_one(
+        {"age": age, "score": score, "z_score": z_score, "iq_score": iq_score}
+    )
     return jsonify({"score": iq_score})
+
+
+@app.route("/api/score", methods=["GET"])
+def get_latest_score():
+    item = collection4.find().sort([("_id", pymongo.DESCENDING)]).limit(1)
+    score = int(item[0]["iq_score"])
+    return jsonify({"score": score})
 
 
 # if __name__ == "__main__":
