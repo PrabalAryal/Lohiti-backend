@@ -56,10 +56,11 @@ class collection_hard_questions(collection_easy_questions, collection_medium_que
         return questions
 
 
-@app.route("/age", methods=["POST"])
+"""@app.route("/age", methods=["POST"])
 def receive_age():
     age = request.json.get("age")
     print("the age is ", age)
+"""
 
 
 @app.route("/api/questions", methods=["GET"])
@@ -87,9 +88,7 @@ def receive_answers():
     standard_deviation = 5.113
     z_score = (score - mean) / standard_deviation
     iq_score = (z_score * 15) + 100
-    collection4.insert_one(
-        {"age": age, "score": score, "z_score": z_score, "iq_score": iq_score}
-    )
+    collection4.insert_one({"score": score, "z_score": z_score, "iq_score": iq_score})
     return jsonify({"score": iq_score})
 
 
