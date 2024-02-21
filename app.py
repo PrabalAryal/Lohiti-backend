@@ -5,10 +5,11 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 
-# import pandas as pd
+import pandas as pd
 import sklearn
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import GradientBoostingRegressor
 
 
 app = Flask(__name__)
@@ -56,13 +57,6 @@ class collection_hard_questions(collection_easy_questions, collection_medium_que
         return questions
 
 
-"""@app.route("/age", methods=["POST"])
-def receive_age():
-    age = request.json.get("age")
-    print("the age is ", age)
-"""
-
-
 @app.route("/api/questions", methods=["GET"])
 def get_questions():
     global correct_answers
@@ -74,22 +68,33 @@ def get_questions():
 @app.route("/api/answers", methods=["POST", "GET"])
 def receive_answers():
     # age = receive_age()  # Assuming this function is defined elsewhere
-    answers = request.json.get(
-        "answers", []
-    )  # Change to 'answers' instead of 'selectedOptions'
+    answers = request.json.get("answers", [])
+    time_taken = request.json.get("time_taken", 0)  # Get time taken
     score = 0
     print(correct_answers)
     print(answers)
     for i in range(min(len(answers), len(correct_answers))):
         if answers[i].lower() == correct_answers[i].lower():
             score += 1
-
-    mean = 12  # Adjust the mean and standard deviation according to your data
-    standard_deviation = 5.113
-    z_score = (score - mean) / standard_deviation
-    iq_score = (z_score * 15) + 100
-    collection4.insert_one({"score": score, "z_score": z_score, "iq_score": iq_score})
-    return jsonify({"score": iq_score})
+    data = pd.DataFrame(list(collection4.find()))
+    x = data[["score", "time"]]
+    y = data["iq_score"]
+    x_train, x_test, y_train, y_test = train_test_split(
+        x, y, test_size=0.2, random_state=42
+    )
+    model = GradientBoostingRegressor()
+    model.fit(x_train, y_train)
+    z_score = (score - np.mean(data["score"])) / np.std(data["score"])
+    iq_score = model.predict([[score, time_taken]])
+    collection4.insert_one(
+        {
+            "score": score,
+            "z_score": z_score,
+            "iq_score": iq_score[0],
+            "time": time_taken,
+        }
+    )
+    return jsonify({"score": iq_score[0]})
 
 
 @app.route("/api/score", methods=["GET"])
@@ -100,4 +105,4 @@ def get_latest_score():
 
 
 # if __name__ == "__main__":
-#     app.run(debug=True)
+#   app.run(debug=True)
